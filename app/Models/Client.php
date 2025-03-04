@@ -24,4 +24,9 @@ class Client extends Model
         'hosting_start_date' => 'date',
         'hosting_expiration_date' => 'date',
     ];
+
+    public function renewalLogs()
+    {
+        return $this->hasMany(RenewalLog::class);
+    }   
 }

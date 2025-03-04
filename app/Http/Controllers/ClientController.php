@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\RenewalLog;
+
 
 class ClientController extends Controller
 {
@@ -45,10 +47,9 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
+        // Επικύρωση δεδομένων
         $validatedData = $request->validate([
             'domain_name' => 'required|unique:clients,domain_name,' . $client->id,
-            'first_name' => 'required',
-            'last_name' => 'required',
             'afm' => 'required',
             'email' => 'required|email',
             'hosting_cost' => 'required|numeric',
@@ -57,9 +58,21 @@ class ClientController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // Ελέγχουμε αν η ημερομηνία λήξης έχει αλλάξει
+        if ($client->hosting_expiration_date != $validatedData['hosting_expiration_date']) {
+            // Καταγραφή της αλλαγής στο ιστορικό ανανεώσεων
+            RenewalLog::create([
+                'client_id' => $client->id,
+                'old_expiration_date' => $client->hosting_expiration_date,
+                'new_expiration_date' => $validatedData['hosting_expiration_date'],
+                'renewed_at' => now(),
+            ]);
+        }
+
+        // Ενημέρωση του πελάτη με τα νέα δεδομένα
         $client->update($validatedData);
 
-        return redirect()->route('clients.index')->with('success', 'Ο πελάτης ενημερώθηκε.');
+        return redirect()->route('clients.index')->with('success', 'Τα στοιχεία του πελάτη ενημερώθηκαν επιτυχώς.');
     }
 
     public function destroy(Client $client)
@@ -71,18 +84,30 @@ class ClientController extends Controller
  
     public function renew(Client $client)
     {
-        // Ελέγχουμε αν η φιλοξενία λήγει μέσα στον επόμενο μήνα
+        // Έλεγχος αν η φιλοξενία λήγει μέσα στον επόμενο μήνα
         if (Carbon::parse($client->hosting_expiration_date)->gt(Carbon::now()->addMonth())) {
             return redirect()->route('clients.index')->with('error', 'Η φιλοξενία μπορεί να ανανεωθεί μόνο όταν απομένει 1 μήνας ή λιγότερο.');
         }
 
-        // Προσθέτουμε 1 έτος από την ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ (και όχι από σήμερα)
-        $newExpirationDate = Carbon::parse($client->hosting_expiration_date)->addYear();
+        // Αποθηκεύουμε ΠΡΩΤΑ την παλιά ημερομηνία πριν την αλλάξουμε
+        $oldExpirationDate = Carbon::parse($client->hosting_expiration_date);
 
-        // Ενημερώνουμε τη βάση δεδομένων
+        // Δημιουργούμε ΝΕΟ instance με copy() ώστε να μην αλλάξουμε το original
+        $newExpirationDate = $oldExpirationDate->copy()->addYear();
+
+        // Ενημέρωση της ημερομηνίας λήξης του πελάτη
         $client->update([
             'hosting_expiration_date' => $newExpirationDate,
         ]);
+
+        // Καταγραφή της ανανέωσης στο ιστορικό
+        RenewalLog::create([
+            'client_id' => $client->id,
+            'old_expiration_date' => $oldExpirationDate,
+            'new_expiration_date' => $newExpirationDate,
+            'renewed_at' => now(),
+        ]);
+
         return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε για 1 ακόμη έτος.');
     }
 
