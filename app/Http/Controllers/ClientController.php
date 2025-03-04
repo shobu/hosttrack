@@ -84,5 +84,11 @@ class ClientController extends Controller
             'hosting_expiration_date' => $newExpirationDate,
         ]);
         return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε για 1 ακόμη έτος.');
-    }   
+    }
+
+    public function show(Client $client)
+        {
+            return view('clients.show', compact('client'));
+        }
+
 }

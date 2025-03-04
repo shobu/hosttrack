@@ -26,14 +26,8 @@
                             $diffInDays = $now->diffInDays($expirationDate);
                             $canRenew = $diffInDays <= 30;
                         @endphp
-
+                        <a href="{{ route('clients.show', $client) }}" class="btn btn-info">Προβολή</a>
                         <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Επεξεργασία</a>
-
-                        <form action="{{ route('clients.destroy', $client) }}" method="POST" style="display:inline;">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Διαγραφή</button>
-                        </form>
-
                         <form action="{{ route('clients.renew', $client) }}" method="POST" style="display:inline;">
                             @csrf
                             <button type="submit" class="btn btn-success" {{ $canRenew ? '' : 'disabled' }}>
