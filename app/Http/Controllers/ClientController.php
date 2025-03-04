@@ -25,11 +25,12 @@ class ClientController extends Controller
             'domain_name' => 'required|unique:clients',
             'first_name' => 'required',
             'last_name' => 'required',
-            'afm' => 'required|unique:clients',
+            'afm' => 'required',
             'email' => 'required|email',
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
-            'hosting_expiration_date' => 'required|date|after:hosting_start_date'
+            'hosting_expiration_date' => 'required|date|after:hosting_start_date',
+            'notes' => 'nullable|string',
         ]);
 
         Client::create($validatedData);
@@ -46,11 +47,14 @@ class ClientController extends Controller
     {
         $validatedData = $request->validate([
             'domain_name' => 'required|unique:clients,domain_name,' . $client->id,
-            'afm' => 'required|unique:clients,afm,' . $client->id,
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'afm' => 'required',
             'email' => 'required|email',
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
-            'hosting_expiration_date' => 'required|date|after:hosting_start_date'
+            'hosting_expiration_date' => 'required|date|after:hosting_start_date',
+            'notes' => 'nullable|string',
         ]);
 
         $client->update($validatedData);

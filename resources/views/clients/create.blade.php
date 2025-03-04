@@ -48,6 +48,10 @@
             <label class="form-label">Ημερομηνία Λήξης</label>
             <input type="date" name="hosting_expiration_date" class="form-control" required>
         </div>
+        <div class="mb-3">
+            <label class="form-label">Σημειώσεις</label>
+            <textarea name="notes" class="form-control"></textarea>
+        </div>
         <button type="submit" class="btn btn-primary">Προσθήκη</button>
         <a href="{{ route('clients.index') }}" class="btn btn-secondary">Ακύρωση</a>
     </form>
