@@ -64,11 +64,21 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Ο πελάτης διαγράφηκε.');
     }
 
+ 
     public function renew(Client $client)
     {
-        $newExpirationDate = Carbon::parse($client->hosting_expiration_date)->addYear();
-        $client->update(['hosting_expiration_date' => $newExpirationDate]);
+        // Ελέγχουμε αν η φιλοξενία λήγει μέσα στον επόμενο μήνα
+        if (Carbon::parse($client->hosting_expiration_date)->gt(Carbon::now()->addMonth())) {
+            return redirect()->route('clients.index')->with('error', 'Η φιλοξενία μπορεί να ανανεωθεί μόνο όταν απομένει 1 μήνας ή λιγότερο.');
+        }
 
-        return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε.');
-    }
+        // Προσθέτουμε 1 έτος από την ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ (και όχι από σήμερα)
+        $newExpirationDate = Carbon::parse($client->hosting_expiration_date)->addYear();
+
+        // Ενημερώνουμε τη βάση δεδομένων
+        $client->update([
+            'hosting_expiration_date' => $newExpirationDate,
+        ]);
+        return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε για 1 ακόμη έτος.');
+    }   
 }

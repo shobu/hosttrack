@@ -20,10 +20,25 @@
                     <td>{{ $client->domain_name }}</td>
                     <td>{{ \Carbon\Carbon::parse($client->hosting_expiration_date)->format('d/m/Y') }}</td>
                     <td>
+                        @php
+                            $expirationDate = \Carbon\Carbon::parse($client->hosting_expiration_date);
+                            $now = \Carbon\Carbon::now();
+                            $diffInDays = $now->diffInDays($expirationDate);
+                            $canRenew = $diffInDays <= 30;
+                        @endphp
+
                         <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Επεξεργασία</a>
+
                         <form action="{{ route('clients.destroy', $client) }}" method="POST" style="display:inline;">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-danger">Διαγραφή</button>
+                        </form>
+
+                        <form action="{{ route('clients.renew', $client) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-success" {{ $canRenew ? '' : 'disabled' }}>
+                                Ανανέωση +1 Έτος
+                            </button>
                         </form>
                     </td>
                 </tr>
