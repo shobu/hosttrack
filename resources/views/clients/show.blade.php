@@ -30,28 +30,29 @@
     </div>
 
     <h3>Ιστορικό Ανανέωσης</h3>
-        @if ($client->renewalLogs->count() > 0)
-            <table class="table">
-                <thead>
+   
+    @if ($client->renewalLogs->count() > 0)
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Προηγούμενη Λήξη</th>
+                    <th>Νέα Λήξη</th>
+                    <th>Ημερομηνία Ανανέωσης</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($client->renewalLogs as $log)
                     <tr>
-                        <th>Προηγούμενη Λήξη</th>
-                        <th>Νέα Λήξη</th>
-                        <th>Ημερομηνία Ανανέωσης</th>
+                        <td>{{ \Carbon\Carbon::parse($log->old_expiration_date)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($log->new_expiration_date)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($log->renewed_at)->format('d/m/Y H:i') }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach ($client->renewalLogs as $log)
-                        <tr>
-                            <td>{{ \Carbon\Carbon::parse($log->old_expiration_date)->format('d/m/Y') }}</td>
-                            <td>{{ \Carbon\Carbon::parse($log->new_expiration_date)->format('d/m/Y') }}</td>
-                            <td>{{ \Carbon\Carbon::parse($log->renewed_at)->format('d/m/Y H:i') }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <p>Δεν υπάρχουν ανανεώσεις για αυτόν τον πελάτη.</p>
-        @endif
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <p>Δεν υπάρχουν ανανεώσεις για αυτόν τον πελάτη.</p>
+    @endif
 
 </div>
 

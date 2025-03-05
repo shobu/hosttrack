@@ -42,6 +42,7 @@
             <label class="form-label">Κόστος Φιλοξενίας</label>
             <input type="number" step="0.01" name="hosting_cost" class="form-control" value="{{ $client->hosting_cost }}" required>
         </div>
+
         <div class="mb-3">
             <label class="form-label">Ημερομηνία Έναρξης</label>
             <input type="date" name="hosting_start_date" class="form-control" value="{{ $client->hosting_start_date->format('Y-m-d') }}" required>

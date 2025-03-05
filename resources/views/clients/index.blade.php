@@ -4,6 +4,14 @@
 <div class="container">
     <h2>Λίστα Πελατών</h2>
     <a href="{{ route('clients.create') }}" class="btn btn-primary mb-3">Προσθήκη Νέου Πελάτη</a>
+
+    <form action="{{ route('clients.index') }}" method="GET" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Αναζήτηση πελάτη, domain ή τιμολογίου..." value="{{ request('search') }}">
+            <button type="submit" class="btn btn-primary">Αναζήτηση</button>
+        </div>
+    </form>
+
     <table class="table">
         <thead>
             <tr>

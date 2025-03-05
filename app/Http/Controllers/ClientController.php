@@ -10,9 +10,23 @@ use App\Models\RenewalLog;
 
 class ClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clients = Client::orderBy('hosting_expiration_date', 'asc')->paginate(10);
+        $query = Client::query();
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('domain_name', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('afm', 'like', "%{$search}%")
+                  ->orWhereHas('renewalLogs', function ($q) use ($search) {
+                      $q->where('invoice_number', 'like', "%{$search}%");
+                  });
+        }
+    
+        $clients = $query->orderBy('hosting_expiration_date', 'asc')->paginate(10);
+    
         return view('clients.index', compact('clients'));
     }
 
@@ -84,23 +98,17 @@ class ClientController extends Controller
  
     public function renew(Client $client)
     {
-        // Έλεγχος αν η φιλοξενία λήγει μέσα στον επόμενο μήνα
         if (Carbon::parse($client->hosting_expiration_date)->gt(Carbon::now()->addMonth())) {
             return redirect()->route('clients.index')->with('error', 'Η φιλοξενία μπορεί να ανανεωθεί μόνο όταν απομένει 1 μήνας ή λιγότερο.');
         }
 
-        // Αποθηκεύουμε ΠΡΩΤΑ την παλιά ημερομηνία πριν την αλλάξουμε
         $oldExpirationDate = Carbon::parse($client->hosting_expiration_date);
-
-        // Δημιουργούμε ΝΕΟ instance με copy() ώστε να μην αλλάξουμε το original
         $newExpirationDate = $oldExpirationDate->copy()->addYear();
 
-        // Ενημέρωση της ημερομηνίας λήξης του πελάτη
         $client->update([
             'hosting_expiration_date' => $newExpirationDate,
         ]);
 
-        // Καταγραφή της ανανέωσης στο ιστορικό
         RenewalLog::create([
             'client_id' => $client->id,
             'old_expiration_date' => $oldExpirationDate,
@@ -110,6 +118,21 @@ class ClientController extends Controller
 
         return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε για 1 ακόμη έτος.');
     }
+
+
+    public function updateInvoice(Request $request, RenewalLog $renewalLog)
+    {
+        $request->validate([
+            'invoice_number' => 'nullable|string|max:50'
+        ]);
+
+        $renewalLog->update([
+            'invoice_number' => $request->invoice_number
+        ]);
+
+        return back()->with('success', 'Ο αριθμός τιμολογίου ενημερώθηκε επιτυχώς.');
+    }
+
 
     public function show(Client $client)
         {
