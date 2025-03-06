@@ -16,13 +16,11 @@ class ClientController extends Controller
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
-            $query->where('domain_name', 'like', "%{$search}%")
-                  ->orWhere('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('afm', 'like', "%{$search}%")
-                  ->orWhereHas('renewalLogs', function ($q) use ($search) {
-                      $q->where('invoice_number', 'like', "%{$search}%");
-                  });
+            $query->where('domain_name', 'LIKE', "%{$search}%")
+                ->orWhere('first_name', 'LIKE', "%{$search}%")
+                ->orWhere('last_name', 'LIKE', "%{$search}%")
+                ->orWhere('afm', 'LIKE', "%{$search}%")
+                ->orWhere('notes', 'LIKE', "%{$search}%");
         }
     
         $clients = $query->orderBy('hosting_expiration_date', 'asc')->paginate(10);
