@@ -30,22 +30,24 @@
                     <td>{{ $client->domain_name }}</td>
                     <td>{{ \Carbon\Carbon::parse($client->hosting_expiration_date)->format('d/m/Y') }}</td>
                     <td>
-                        @php
-                            $expirationDate = \Carbon\Carbon::parse($client->hosting_expiration_date);
-                            $now = \Carbon\Carbon::now();
-                            $diffInDays = $now->diffInDays($expirationDate);
-                            $canRenew = $diffInDays <= 30;
-                        @endphp
-                        <a href="{{ route('clients.show', $client) }}" class="btn btn-info">Προβολή</a>
-                        <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Επεξεργασία</a>
-                        <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST" style="display:inline;">
-                            @csrf
-                            <button type="button" class="btn btn-success btn-sm" 
-                                    onclick="confirmRenew({{ $client->id }})" 
-                                    {{ $canRenew ? '' : 'disabled' }}>
-                                Ανανέωση +1 Έτος
-                            </button>
-                        </form>
+                        <div class="d-flex align-items-center gap-2">
+                            @php
+                                $expirationDate = \Carbon\Carbon::parse($client->hosting_expiration_date);
+                                $now = \Carbon\Carbon::now();
+                                $diffInDays = $now->diffInDays($expirationDate);
+                                $canRenew = $diffInDays <= 30;
+                            @endphp
+                            <a href="{{ route('clients.show', $client) }}" class="btn btn-info">Προβολή</a>
+                            <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Επεξεργασία</a>
+                            <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST">
+                                @csrf
+                                <button type="button" class="btn btn-success" 
+                                        onclick="confirmAction('renew-form-{{ $client->id }}', 'Θέλεις να προσθέσεις 1 έτος στη φιλοξενία;')" 
+                                        {{ $canRenew ? '' : 'disabled' }}>
+                                    Ανανέωση +1 Έτος
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @endforeach

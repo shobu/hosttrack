@@ -19,14 +19,14 @@
 
             <div class="d-flex gap-2">
                 <!-- Κουμπί Επεξεργασίας -->
-                <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning btn-sm">
+                <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">
                     Επεξεργασία
                 </a>
 
                 <!-- Κουμπί Ανανέωσης -->
                 <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST">
                     @csrf
-                    <button type="button" class="btn btn-success btn-sm" 
+                    <button type="button" class="btn btn-success" 
                             onclick="confirmAction('renew-form-{{ $client->id }}', 'Θέλεις να προσθέσεις 1 έτος στη φιλοξενία;')" 
                             {{ $canRenew ? '' : 'disabled' }}>
                         Ανανέωση +1 Έτος
@@ -37,7 +37,7 @@
                 <form id="delete-form-{{ $client->id }}" action="{{ route('clients.destroy', $client) }}" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="button" class="btn btn-danger btn-sm"
+                    <button type="button" class="btn btn-danger"
                             onclick="confirmAction('delete-form-{{ $client->id }}', 'Θέλεις να διαγράψεις αυτόν τον πελάτη;')">
                         Διαγραφή Πελάτη
                     </button>

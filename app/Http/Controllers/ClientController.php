@@ -13,7 +13,7 @@ class ClientController extends Controller
     public function index(Request $request)
     {
         $query = Client::query();
-
+    
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where('domain_name', 'LIKE', "%{$search}%")
@@ -24,6 +24,11 @@ class ClientController extends Controller
         }
     
         $clients = $query->orderBy('hosting_expiration_date', 'asc')->paginate(10);
+    
+        // Υπολογισμός του canRenew για κάθε πελάτη
+        foreach ($clients as $client) {
+            $client->canRenew = \Carbon\Carbon::parse($client->hosting_expiration_date)->lte(now()->addMonth());
+        }
     
         return view('clients.index', compact('clients'));
     }
