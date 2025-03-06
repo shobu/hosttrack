@@ -54,6 +54,8 @@
             @endif
         </tbody>
     </table>
-    {{ $clients->links() }}
+    <div class="d-flex justify-content-center">
+        {{ $clients->links('pagination::bootstrap-4') }}
+    </div>
 </div>
 @endsection
