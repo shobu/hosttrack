@@ -23,7 +23,9 @@
         </thead>
         <tbody>
             @foreach($clients as $client)
-                <tr>
+                <tr class="@if($client->hosting_expiration_date < now()) border-left-danger 
+                    @elseif($client->hosting_expiration_date < now()->addMonth()) border-left-warning 
+                    @endif">
                     <td>{{ $client->first_name }} {{ $client->last_name }}</td>
                     <td>{{ $client->domain_name }}</td>
                     <td>{{ \Carbon\Carbon::parse($client->hosting_expiration_date)->format('d/m/Y') }}</td>

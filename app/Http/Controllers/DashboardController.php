@@ -34,6 +34,8 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        return view('dashboard.index', compact('totalClients', 'expiringClients', 'recentRenewals', 'renewalsPerMonth'));
+        $expired = Client::where('hosting_expiration_date', '<', now())->count();
+
+        return view('dashboard.index', compact('totalClients', 'expiringClients', 'recentRenewals', 'renewalsPerMonth', 'expired'));
     }
 }

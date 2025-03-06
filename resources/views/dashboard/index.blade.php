@@ -5,7 +5,7 @@
     <h2>Dashboard</h2>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card text-white bg-primary mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Συνολικοί Πελάτες</h5>
@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card text-white bg-warning mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Φιλοξενίες που Λήγουν Σύντομα</h5>
@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card text-white bg-success mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Ανανεώσεις Τελευταίου Μήνα</h5>
@@ -31,7 +31,16 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Ληγμένα Hostings</h5>
+                    <p class="card-text display-4">{{ $expired }}</p>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
     <h3>Ανανεώσεις Ανά Μήνα</h3>
     <canvas id="renewalsChart"></canvas>
