@@ -17,15 +17,35 @@
 
             <hr>
 
-            <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Επεξεργασία</a>
+            <div class="d-flex gap-2">
+                <!-- Κουμπί Επεξεργασίας -->
+                <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning btn-sm">
+                    Επεξεργασία
+                </a>
 
-            <!-- Κουμπί Διαγραφής με Confirmation -->
-            <form action="{{ route('clients.destroy', $client) }}" method="POST" style="display:inline;">
-                @csrf @method('DELETE')
-                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Διαγραφή</button>
-            </form>
+                <!-- Κουμπί Ανανέωσης -->
+                <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST">
+                    @csrf
+                    <button type="button" class="btn btn-success btn-sm" 
+                            onclick="confirmAction('renew-form-{{ $client->id }}', 'Θέλεις να προσθέσεις 1 έτος στη φιλοξενία;')" 
+                            {{ $canRenew ? '' : 'disabled' }}>
+                        Ανανέωση +1 Έτος
+                    </button>
+                </form>
 
-            <a href="{{ route('clients.index') }}" class="btn btn-secondary">Επιστροφή στη Λίστα</a>
+                <!-- Κουμπί Διαγραφής -->
+                <form id="delete-form-{{ $client->id }}" action="{{ route('clients.destroy', $client) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn btn-danger btn-sm"
+                            onclick="confirmAction('delete-form-{{ $client->id }}', 'Θέλεις να διαγράψεις αυτόν τον πελάτη;')">
+                        Διαγραφή Πελάτη
+                    </button>
+                </form>
+
+                <a href="{{ route('clients.index') }}" class="btn btn-secondary">Επιστροφή στη Λίστα</a>
+            </div>
+            
         </div>
     </div>
 

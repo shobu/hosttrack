@@ -38,9 +38,11 @@
                         @endphp
                         <a href="{{ route('clients.show', $client) }}" class="btn btn-info">Προβολή</a>
                         <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Επεξεργασία</a>
-                        <form action="{{ route('clients.renew', $client) }}" method="POST" style="display:inline;">
+                        <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST" style="display:inline;">
                             @csrf
-                            <button type="submit" class="btn btn-success" {{ $canRenew ? '' : 'disabled' }}>
+                            <button type="button" class="btn btn-success btn-sm" 
+                                    onclick="confirmRenew({{ $client->id }})" 
+                                    {{ $canRenew ? '' : 'disabled' }}>
                                 Ανανέωση +1 Έτος
                             </button>
                         </form>

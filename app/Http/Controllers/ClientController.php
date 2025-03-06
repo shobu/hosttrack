@@ -28,6 +28,7 @@ class ClientController extends Controller
         return view('clients.index', compact('clients'));
     }
 
+
     public function create()
     {
         return view('clients.create');
@@ -134,7 +135,9 @@ class ClientController extends Controller
 
     public function show(Client $client)
         {
-            return view('clients.show', compact('client'));
+            $canRenew = \Carbon\Carbon::parse($client->hosting_expiration_date)->lte(now()->addMonth());
+
+            return view('clients.show', compact('client', 'canRenew'));
         }
 
 }
