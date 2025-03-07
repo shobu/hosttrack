@@ -22,18 +22,21 @@ class SendHostingExpiryNotifications extends Command
 
     public function handle()
     {
-        // Εύρεση πελατών που λήγουν σε 30 ημέρες
+        // Εύρεση πελατών που λήγουν σε 30 ημέρες και ταξινόμηση
         $expiryDate = Carbon::now()->addDays(30);
-        $expiringClients = Client::where('hosting_expiration_date', '<=', $expiryDate)->get();
-
+        $expiringClients = Client::where('hosting_expiration_date', '<=', $expiryDate)
+                                 ->orderBy('hosting_expiration_date', 'asc')
+                                 ->get();
+    
+        // Αν δεν υπάρχουν πελάτες που λήγουν, δεν στέλνουμε email
         if ($expiringClients->isEmpty()) {
-            $this->info('Δεν βρέθηκαν πελάτες που λήγουν σύντομα.');
+            $this->info('Δεν βρέθηκαν πελάτες που λήγουν σύντομα. Δεν στάλθηκε email.');
             return;
         }
-
-        // Στέλνουμε **ένα email** με όλους τους πελάτες
+    
+        // Στέλνουμε **ένα email** με τους πελάτες ταξινομημένους σωστά
         Mail::to('vassilis@teamapp.gr')->send(new HostingExpirySummary($expiringClients));
-
+    
         $this->info('Το email με τις επερχόμενες λήξεις στάλθηκε επιτυχώς.');
     }
 }
