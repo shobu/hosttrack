@@ -2,64 +2,68 @@
 
 @section('content')
 <div class="container">
-    <h2>Λίστα Πελατών</h2>
-    <a href="{{ route('clients.create') }}" class="btn btn-primary mb-3">Προσθήκη Νέου Πελάτη</a>
+    <h2 class="mb-4">Λίστα Πελατών</h2>
 
-    <form action="{{ route('clients.index') }}" method="GET" class="mb-3">
+    <!-- Φόρμα Αναζήτησης -->
+    <form method="GET" action="{{ route('clients.index') }}" class="mb-3">
         <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Αναζήτηση πελάτη, domain ή τιμολογίου..." value="{{ request('search') }}">
+            <input type="text" name="search" class="form-control" placeholder="Αναζήτηση πελάτη..." value="{{ request('search') }}">
             <button type="submit" class="btn btn-primary">Αναζήτηση</button>
         </div>
     </form>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Όνομα</th>
-                <th>Domain</th>
-                <th>Λήξη Φιλοξενίας</th>
-                <th>Ενέργειες</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($clients as $client)
-                <tr class="@if(Carbon\Carbon::parse($client->hosting_expiration_date)->lt(now())) border-left-danger 
-                                @elseif(Carbon\Carbon::parse($client->hosting_expiration_date)->lt(now()->addMonth())) border-left-warning 
-                            @endif">
+    <!-- Πίνακας Πελατών -->
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Όνομα</th>
+                    <th>Domain</th>
+                    <th>Λήξη Hosting</th>
+                    <th>Ενέργειες</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($clients as $client)
+                <tr class="{{ $client->can_renew ? 'border-left-warning' : '' }} {{ $client->hosting_expiration_date < now() ? 'border-left-danger' : '' }}">
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $client->first_name }} {{ $client->last_name }}</td>
                     <td>{{ $client->domain_name }}</td>
                     <td>{{ \Carbon\Carbon::parse($client->hosting_expiration_date)->format('d/m/Y') }}</td>
                     <td>
-                        <div class="d-flex align-items-center gap-2">
-                            @php
-                                $expirationDate = \Carbon\Carbon::parse($client->hosting_expiration_date);
-                                $now = \Carbon\Carbon::now();
-                                $diffInDays = $now->diffInDays($expirationDate);
-                                $canRenew = $diffInDays <= 30;
-                            @endphp
-                            <a href="{{ route('clients.show', $client) }}" class="btn btn-info">Προβολή</a>
-                            <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Επεξεργασία</a>
-                            <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST">
-                                @csrf
-                                <button type="button" class="btn btn-success" 
-                                        onclick="confirmAction('renew-form-{{ $client->id }}', 'Θέλεις να προσθέσεις 1 έτος στη φιλοξενία;')" 
-                                        {{ $canRenew ? '' : 'disabled' }}>
-                                    Ανανέωση +1 Έτος
-                                </button>
-                            </form>
+                        <div class="d-flex gap-2">
+                            <!-- Κουμπί Προβολής Πελάτη -->
+                            <a href="{{ route('clients.show', $client) }}" class="btn btn-info btn-sm">Προβολή</a>
+
+                            <!-- Κουμπί Επεξεργασίας -->
+                            <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning btn-sm">Επεξεργασία</a>
+
+                            <!-- Κουμπί Ανανέωσης (Ενεργοποιείται 1 μήνα πριν τη λήξη) -->
+                            @if ($client->can_renew)
+                                <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST">
+                                    @csrf
+                                    <button type="button" class="btn btn-success btn-sm"
+                                            onclick="confirmAction('renew-form-{{ $client->id }}', 'Θέλεις να προσθέσεις 1 έτος στη φιλοξενία;')">
+                                        Ανανέωση +1 Έτος
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </td>
                 </tr>
-            @endforeach
-            @if($clients->isEmpty())
+                @empty
                 <tr>
-                    <td colspan="4" class="text-center text-muted">Δεν υπάρχουν πελάτες.</td>
+                    <td colspan="5" class="text-center">Δεν βρέθηκαν πελάτες.</td>
                 </tr>
-            @endif
-        </tbody>
-    </table>
-    <div class="d-flex justify-content-center">
-        {{ $clients->links('pagination::bootstrap-4') }}
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-3">
+        {{ $clients->links() }}
     </div>
 </div>
 @endsection

@@ -4,7 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hosting Manager</title>
+
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 </head>
 <body>
@@ -29,7 +34,7 @@
         @yield('content')
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmAction(formId, message) {
@@ -49,5 +54,32 @@
             });
         }
     </script>
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- FontAwesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+    <!-- Αυτόματη μετατροπή ημερομηνίας σε μορφή dd/mm/yyyy -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("input[type=date]").forEach(function (input) {
+                input.addEventListener("change", function () {
+                    let date = new Date(this.value);
+                    if (!isNaN(date.getTime())) {
+                        let formattedDate = ("0" + date.getDate()).slice(-2) + "/" + 
+                                            ("0" + (date.getMonth() + 1)).slice(-2) + "/" + 
+                                            date.getFullYear();
+                        this.setAttribute("data-formatted-date", formattedDate);
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>

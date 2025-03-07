@@ -28,5 +28,11 @@ class Client extends Model
     public function renewalLogs()
     {
         return $this->hasMany(RenewalLog::class);
-    }   
+    }  
+
+    public function getCanRenewAttribute()
+    {
+        return \Carbon\Carbon::parse($this->hosting_expiration_date)->lte(now()->addMonth());
+    }
+
 }

@@ -10,26 +10,27 @@ use App\Models\RenewalLog;
 
 class ClientController extends Controller
 {
+
     public function index(Request $request)
     {
         $query = Client::query();
-    
+
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
-            $query->where('domain_name', 'LIKE', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('domain_name', 'LIKE', "%{$search}%")
                 ->orWhere('first_name', 'LIKE', "%{$search}%")
                 ->orWhere('last_name', 'LIKE', "%{$search}%")
                 ->orWhere('afm', 'LIKE', "%{$search}%")
                 ->orWhere('notes', 'LIKE', "%{$search}%");
+            });
         }
-    
-        $clients = $query->orderBy('hosting_expiration_date', 'asc')->paginate(10);
-    
-        // Υπολογισμός του canRenew για κάθε πελάτη
-        foreach ($clients as $client) {
-            $client->canRenew = \Carbon\Carbon::parse($client->hosting_expiration_date)->lte(now()->addMonth());
-        }
-    
+
+        // Φορτώνουμε τα renewal logs μαζί με τα clients για καλύτερη απόδοση
+        $clients = $query->with('renewalLogs')
+                        ->orderBy('hosting_expiration_date', 'asc')
+                        ->paginate(10);
+
         return view('clients.index', compact('clients'));
     }
 
@@ -41,6 +42,8 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
+
+        // Validation των πεδίων
         $validatedData = $request->validate([
             'domain_name' => 'required|unique:clients',
             'first_name' => 'required',
@@ -50,35 +53,40 @@ class ClientController extends Controller
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
             'hosting_expiration_date' => 'required|date|after:hosting_start_date',
-            'notes' => 'nullable|string',
         ]);
-
+    
+        // Μετατροπή ημερομηνιών από `d/m/Y` σε `Y-m-d` πριν αποθηκευτούν στη βάση
+        $validatedData['hosting_start_date'] = \Carbon\Carbon::createFromFormat('Y-m-d', $request->hosting_start_date)->format('Y-m-d');
+        $validatedData['hosting_expiration_date'] = \Carbon\Carbon::createFromFormat('Y-m-d', $request->hosting_expiration_date)->format('Y-m-d');       
+    
+        // Δημιουργία νέου πελάτη
         Client::create($validatedData);
-
-        return redirect()->route('clients.index')->with('success', 'Ο πελάτης προστέθηκε επιτυχώς.');
+    
+        return redirect()->route('clients.index')->with('success', 'Ο πελάτης δημιουργήθηκε επιτυχώς.');
     }
-
-    public function edit(Client $client)
-    {
-        return view('clients.edit', compact('client'));
-    }
-
+    
+    
     public function update(Request $request, Client $client)
     {
-        // Επικύρωση δεδομένων
+
+        // Validation των πεδίων
         $validatedData = $request->validate([
             'domain_name' => 'required|unique:clients,domain_name,' . $client->id,
+            'first_name' => 'required',
+            'last_name' => 'required',
             'afm' => 'required',
             'email' => 'required|email',
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
             'hosting_expiration_date' => 'required|date|after:hosting_start_date',
-            'notes' => 'nullable|string',
         ]);
-
-        // Ελέγχουμε αν η ημερομηνία λήξης έχει αλλάξει
-        if ($client->hosting_expiration_date != $validatedData['hosting_expiration_date']) {
-            // Καταγραφή της αλλαγής στο ιστορικό ανανεώσεων
+    
+        // Μετατροπή ημερομηνιών από `d/m/Y` σε `Y-m-d` πριν αποθηκευτούν στη βάση
+        $validatedData['hosting_start_date'] = \Carbon\Carbon::createFromFormat('Y-m-d', $request->hosting_start_date)->format('Y-m-d');
+        $validatedData['hosting_expiration_date'] = \Carbon\Carbon::createFromFormat('Y-m-d', $request->hosting_expiration_date)->format('Y-m-d');      
+    
+        // Αν γίνει αλλαγή στην ημερομηνία λήξης, καταγραφή στο ιστορικό
+        if ($client->hosting_expiration_date !== $validatedData['hosting_expiration_date']) {
             RenewalLog::create([
                 'client_id' => $client->id,
                 'old_expiration_date' => $client->hosting_expiration_date,
@@ -86,11 +94,17 @@ class ClientController extends Controller
                 'renewed_at' => now(),
             ]);
         }
-
-        // Ενημέρωση του πελάτη με τα νέα δεδομένα
+    
+        // Ενημέρωση πελάτη
         $client->update($validatedData);
-
+    
         return redirect()->route('clients.index')->with('success', 'Τα στοιχεία του πελάτη ενημερώθηκαν επιτυχώς.');
+    }
+    
+
+    public function edit(Client $client)
+    {
+        return view('clients.edit', compact('client'));
     }
 
     public function destroy(Client $client)
@@ -102,25 +116,26 @@ class ClientController extends Controller
  
     public function renew(Client $client)
     {
-        if (Carbon::parse($client->hosting_expiration_date)->gt(Carbon::now()->addMonth())) {
+        if (!$client->can_renew) {
             return redirect()->route('clients.index')->with('error', 'Η φιλοξενία μπορεί να ανανεωθεί μόνο όταν απομένει 1 μήνας ή λιγότερο.');
         }
-
-        $oldExpirationDate = Carbon::parse($client->hosting_expiration_date);
-        $newExpirationDate = $oldExpirationDate->copy()->addYear();
-
-        $client->update([
-            'hosting_expiration_date' => $newExpirationDate,
-        ]);
-
+    
+        // Αποθήκευση προηγούμενης ημερομηνίας
+        $oldExpirationDate = clone $client->hosting_expiration_date;
+        $newExpirationDate = \Carbon\Carbon::parse($client->hosting_expiration_date)->addYear();
+    
+        // Ενημέρωση πελάτη
+        $client->update(['hosting_expiration_date' => $newExpirationDate]);
+    
+        // Καταγραφή στο ιστορικό
         RenewalLog::create([
             'client_id' => $client->id,
             'old_expiration_date' => $oldExpirationDate,
             'new_expiration_date' => $newExpirationDate,
             'renewed_at' => now(),
         ]);
-
-        return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε για 1 ακόμη έτος.');
+    
+        return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε επιτυχώς.');
     }
 
 
