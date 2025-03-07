@@ -18,6 +18,7 @@ class Client extends Model
         'hosting_start_date',
         'hosting_expiration_date',
         'notes',
+        'status',
     ];
 
     protected $casts = [

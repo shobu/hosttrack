@@ -21,6 +21,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('clients', ClientController::class);
     Route::post('/clients/{client}/renew', [ClientController::class, 'renew'])->name('clients.renew');
 
+    // **Inactive Clients Route (χωρίς το /clients/)**
+    Route::get('/inactive-list', [ClientController::class, 'inactive'])->name('clients.inactive');
+    Route::patch('/clients/{client}/deactivate', [ClientController::class, 'deactivate'])->name('clients.deactivate');
+    Route::patch('/clients/{client}/activate', [ClientController::class, 'activate'])->name('clients.activate');
+
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

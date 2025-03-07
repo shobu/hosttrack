@@ -49,6 +49,21 @@
                     </button>
                 </form>
 
+                @if($client->status === 'active')
+                    <form action="{{ route('clients.deactivate', $client) }}" method="POST" onsubmit="return confirm('Είσαι σίγουρος ότι θέλεις να απενεργοποιήσεις αυτόν τον πελάτη;');">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-warning">Απενεργοποίηση</button>
+                    </form>
+                @else
+                    <form action="{{ route('clients.activate', $client) }}" method="POST" onsubmit="return confirm('Είσαι σίγουρος ότι θέλεις να ενεργοποιήσεις αυτόν τον πελάτη;');">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success">Ενεργοποίηση</button>
+                    </form>
+                @endif
+
+
                 <a href="{{ route('clients.index') }}" class="btn btn-secondary">Επιστροφή στη Λίστα</a>
             </div>
             

@@ -13,7 +13,7 @@ class ClientController extends Controller
 
     public function index(Request $request)
     {
-        $query = Client::query();
+        $query = Client::where('status', 'active'); // Φιλτράρουμε τους ενεργούς πελάτες
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
@@ -166,5 +166,25 @@ class ClientController extends Controller
 
             return view('clients.show', compact('client', 'canRenew'));
         }
+
+    public function inactive()
+    {
+        $clients = Client::where('status', 'inactive')->orderBy('hosting_expiration_date', 'asc')->paginate(10);
+        return view('clients.inactive', compact('clients'));
+    }
+
+    public function deactivate(Client $client)
+    {
+        $client->update(['status' => 'inactive']);
+        return redirect()->route('clients.index')->with('success', 'Ο πελάτης απενεργοποιήθηκε.');
+    }
+
+    public function activate(Client $client)
+    {
+        $client->update(['status' => 'active']);
+
+        return redirect()->route('clients.inactive')->with('success', 'Ο πελάτης ενεργοποιήθηκε ξανά.');
+    }
+
 
 }

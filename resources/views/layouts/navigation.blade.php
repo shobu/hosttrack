@@ -16,6 +16,10 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('clients.create') }}">Προσθήκη Πελάτη</a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('clients.inactive') }}" class="nav-link">Ανενεργοί Πελάτες</a>
+                    </li>
+
                 @endauth
             </ul>
             <ul class="navbar-nav">
