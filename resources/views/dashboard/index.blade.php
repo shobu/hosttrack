@@ -1,51 +1,53 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Dashboard</h2>
+    <div class="container">
+        <h2>Dashboard</h2>
 
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Συνολικοί Πελάτες</h5>
-                    <p class="card-text display-4">{{ $totalClients }}</p>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Συνολικοί Πελάτες</h5>
+                        <p class="card-text display-4">{{ $totalClients }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Φιλοξενίες που Λήγουν Σύντομα</h5>
-                    <p class="card-text display-4">{{ $expiringClients }}</p>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Φιλοξενίες που Λήγουν Σύντομα</h5>
+                        <p class="card-text display-4">{{ $expiringClients }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Ανανεώσεις Τελευταίου Μήνα</h5>
-                    <p class="card-text display-4">{{ $recentRenewals }}</p>
+            <div class="col-md-3">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Ανανεώσεις Τελευταίου Μήνα</h5>
+                        <p class="card-text display-4">{{ $recentRenewals }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-danger mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Ληγμένα Hostings</h5>
-                    <p class="card-text display-4">{{ $expired }}</p>
+            <div class="col-md-3">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Ληγμένα Hostings</h5>
+                        <p class="card-text display-4">{{ $expired }}</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
+<div>
     <h3>Ανανεώσεις Ανά Μήνα</h3>
     <canvas id="renewalsChart"></canvas>
 </div>
-
+<div>
+<h5>Συνολικές πληρωμές: {{ number_format(\App\Models\PaymentLog::sum('amount'), 2) }} €</h5>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {

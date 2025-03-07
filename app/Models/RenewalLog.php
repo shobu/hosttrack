@@ -14,6 +14,7 @@ class RenewalLog extends Model
         'old_expiration_date',
         'new_expiration_date',
         'renewed_at',
+        'payment_id' 
     ];
 
 
@@ -23,5 +24,11 @@ class RenewalLog extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function payment()
+    {
+        return $this->belongsTo(PaymentLog::class, 'payment_id');
+    }
+
 }
 

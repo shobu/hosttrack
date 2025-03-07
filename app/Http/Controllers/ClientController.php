@@ -6,6 +6,7 @@ use App\Models\Client;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\RenewalLog;
+use App\Models\PaymentLog;
 
 
 class ClientController extends Controller
@@ -116,15 +117,20 @@ class ClientController extends Controller
  
     public function renew(Request $request, Client $client)
     {
-        // Μετατροπή της εισόδου σε integer (default: 12 μήνες)
-        $monthsToAdd = (int) $request->input('months', 12);
+        // Παίρνουμε τους μήνες είτε από το dropdown είτε από το custom input
+        $monthsToAdd = ($request->input('months') === 'custom') 
+            ? (int) $request->input('custom_months', 12) 
+            : (int) $request->input('months', 12);
     
-        // Έλεγχος αν η φιλοξενία μπορεί να ανανεωθεί (δηλαδή αν είναι 1 μήνα ή λιγότερο πριν τη λήξη)
+        $amount = (float) $request->input('amount', $client->hosting_cost); 
+    
+        // **Ορισμός της μεταβλητής πριν τη χρήση της**
+        $invoiceNumber = $request->has('invoice_number') ? $request->input('invoice_number') : null;
+    
         if (Carbon::parse($client->hosting_expiration_date)->gt(Carbon::now()->addMonth())) {
             return redirect()->route('clients.index')->with('error', 'Η φιλοξενία μπορεί να ανανεωθεί μόνο όταν απομένει 1 μήνας ή λιγότερο.');
         }
     
-        // Αποθήκευση της παλιάς ημερομηνίας
         $oldExpirationDate = Carbon::parse($client->hosting_expiration_date);
         $newExpirationDate = $oldExpirationDate->copy()->addMonths($monthsToAdd);
     
@@ -132,19 +138,42 @@ class ClientController extends Controller
         $client->update([
             'hosting_expiration_date' => $newExpirationDate,
         ]);
-    
-        // Καταγραφή στο ιστορικό ανανεώσεων
+
+        // **Καταγραφή Πληρωμής στο PaymentLog**
+        $paymentLog = new PaymentLog();
+        $paymentLog->client_id = $client->id;
+        $paymentLog->amount = $amount;
+        $paymentLog->payment_date = now();
+        $paymentLog->invoice_number = $invoiceNumber;
+        $paymentLog->save(); // **Τώρα το αντικείμενο έχει `id`**
+
+
+               
+        // **Καταγραφή στο Ιστορικό Ανανέωσης (RenewalLog)**
         RenewalLog::create([
             'client_id' => $client->id,
             'old_expiration_date' => $oldExpirationDate,
             'new_expiration_date' => $newExpirationDate,
             'renewed_at' => now(),
+            'payment_id' => $paymentLog->id, // **Σύνδεση με την πληρωμή**
         ]);
     
-        return redirect()->route('clients.index')->with('success', "Η φιλοξενία ανανεώθηκε για $monthsToAdd μήνες.");
+
+        return redirect()->route('clients.index')->with('success', "Η φιλοξενία ανανεώθηκε για $monthsToAdd μήνες και καταγράφηκε πληρωμή.");
     }
     
-
+    
+    public function deletePayment(PaymentLog $payment)
+    {
+        // Διαγραφή της αντίστοιχης εγγραφής στο renewal_logs
+        RenewalLog::where('payment_id', $payment->id)->delete();
+    
+        // Διαγραφή της πληρωμής
+        $payment->delete();
+    
+        return back()->with('success', 'Η πληρωμή και η αντίστοιχη εγγραφή ανανέωσης διαγράφηκαν επιτυχώς.');
+    }
+    
 
     public function updateInvoice(Request $request, RenewalLog $renewalLog)
     {
@@ -162,8 +191,8 @@ class ClientController extends Controller
 
     public function show(Client $client)
         {
+            $client->load(['renewalLogs', 'paymentLogs']); // Φόρτωση και των πληρωμών
             $canRenew = \Carbon\Carbon::parse($client->hosting_expiration_date)->lte(now()->addMonth());
-
             return view('clients.show', compact('client', 'canRenew'));
         }
 

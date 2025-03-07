@@ -36,4 +36,13 @@ class Client extends Model
         return \Carbon\Carbon::parse($this->hosting_expiration_date)->lte(now()->addMonth());
     }
 
+    public function payments() {
+        return $this->hasMany(PaymentLog::class);
+    }
+
+    public function paymentLogs()
+    {
+        return $this->hasMany(PaymentLog::class, 'client_id');
+    }
+    
 }

@@ -27,16 +27,9 @@
                 @php
                     $canRenew = \Carbon\Carbon::parse($client->hosting_expiration_date)->lte(\Carbon\Carbon::now()->addDays(30));
                 @endphp
-
-                <button class="btn btn-success renew-btn" data-client-id="{{ $client->id }}" {{ $canRenew ? '' : 'disabled' }}>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#renewalModal-{{ $client->id }}" {{ $canRenew ? '' : 'disabled' }}>
                     Ανανέωση Hosting
                 </button>
-
-                <!-- Form για ανανέωση (θα υποβάλλεται από JavaScript) -->
-                <form id="renewalForm-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST" style="display:none;">
-                    @csrf
-                    <input type="hidden" name="months" id="renewalMonths-{{ $client->id }}" value="12"> 
-                </form>
 
 
                 <!-- Κουμπί Διαγραφής -->
@@ -66,12 +59,52 @@
 
                 <a href="{{ route('clients.index') }}" class="btn btn-secondary">Επιστροφή στη Λίστα</a>
             </div>
+
+            <!-- Modal για Ανανέωση Hosting -->
+            <div class="modal fade" id="renewalModal-{{ $client->id }}" tabindex="-1" aria-labelledby="renewalModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Ανανέωση Hosting για {{ $client->domain_name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="renewalForm-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST">
+                                @csrf
+                                <label for="renewalMonths">Μήνες:</label>
+                                <select name="months" id="renewalMonths-{{ $client->id }}" class="form-control" onchange="toggleCustomMonths({{ $client->id }})">
+                                    <option value="3">3 μήνες</option>
+                                    <option value="6">6 μήνες</option>
+                                    <option value="12" selected>12 μήνες</option>
+                                    <option value="custom">Άλλο...</option>
+                                </select>
+
+                                <!-- Custom μήνες -->
+                                <div id="customMonthsContainer-{{ $client->id }}" style="display: none; margin-top: 10px;">
+                                    <label for="customMonths">Εισαγωγή Μηνών:</label>
+                                    <input type="number" name="custom_months" id="customMonths-{{ $client->id }}" class="form-control" min="1" placeholder="Πληκτρολογήστε μήνες">
+                                </div>
+
+                                <label for="renewalAmount" class="mt-3">Ποσό πληρωμής (€):</label>
+                                <input type="number" name="amount" id="renewalAmount-{{ $client->id }}" class="form-control" value="{{ $client->hosting_cost }}" required>
+
+                                <label for="invoiceNumber" class="mt-3">Αριθμός Τιμολογίου (προαιρετικό):</label>
+                                <input type="text" name="invoice_number" id="invoiceNumber-{{ $client->id }}" class="form-control">
+
+                                <button type="submit" class="btn btn-success mt-3">Ανανέωση</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             
         </div>
     </div>
 
     <h3>Ιστορικό Ανανέωσης</h3>
-   
+    <h5>Σύνολο πληρωμών: {{ number_format($client->payments->sum('amount'), 2) }} €</h5>
+
     @if ($client->renewalLogs->count() > 0)
         <table class="table">
             <thead>
@@ -79,6 +112,9 @@
                     <th>Προηγούμενη Λήξη</th>
                     <th>Νέα Λήξη</th>
                     <th>Ημερομηνία Ανανέωσης</th>
+                    <th>Ποσό (€)</th>
+                    <th>Τιμολόγιο</th>
+                    <th>Ενέργειες</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,6 +123,16 @@
                         <td>{{ \Carbon\Carbon::parse($log->old_expiration_date)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($log->new_expiration_date)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($log->renewed_at)->format('d/m/Y H:i') }}</td>
+                        <td>{{ $log->payment ? number_format($log->payment->amount, 2) : '-' }} €</td>
+                        <td>{{ $log->payment ? $log->payment->invoice_number : '-' }}</td>
+                        <td>
+                            <!-- Φόρμα Διαγραφής Ανανεώσεων -->
+                            <form action="{{ route('renewals.delete', ['renewal' => $log->id]) }}" method="POST" onsubmit="return confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτή την ανανέωση και την αντίστοιχη πληρωμή;');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Διαγραφή</button>
+                            </form>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
