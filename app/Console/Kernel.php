@@ -11,7 +11,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // ✅ Προγραμματισμός της αποστολής ειδοποιήσεων καθημερινά
-        $schedule->command('hosting:send-expiry-notifications')->daily();
+        $schedule->command('hosting:send-expiry-notifications')->cron('0 8 */5 * *'); 
     }
 
     protected function commands()

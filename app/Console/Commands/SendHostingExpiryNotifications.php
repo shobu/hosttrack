@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\HostingExpirySummary;
 use App\Models\Client;
 use App\Notifications\ExpiringHostingNotification;
 use Carbon\Carbon;
@@ -20,20 +22,18 @@ class SendHostingExpiryNotifications extends Command
 
     public function handle()
     {
-        $clients = Client::whereBetween('hosting_expiration_date', [
-            Carbon::now()->addDays(1)->startOfDay(),
-            Carbon::now()->addDays(30)->endOfDay()
-        ])->get();
-        
+        // Εύρεση πελατών που λήγουν σε 30 ημέρες
+        $expiryDate = Carbon::now()->addDays(30);
+        $expiringClients = Client::where('hosting_expiration_date', '<=', $expiryDate)->get();
 
-        if ($clients->count() > 0) {
-            foreach ($clients as $client) {
-                // Στείλε ειδοποίηση στον διαχειριστή (π.χ. admin@example.com)
-                Notification::route('mail', 'vassilis@teamapp.gr')->notify(new ExpiringHostingNotification($client));
-                $this->info('Εστάλη ειδοποίηση για τον πελάτη: ' . $client->domain_name);
-            }
-        } else {
-            $this->info('Δεν βρέθηκαν πελάτες που λήγουν σε 30 ημέρες.');
+        if ($expiringClients->isEmpty()) {
+            $this->info('Δεν βρέθηκαν πελάτες που λήγουν σύντομα.');
+            return;
         }
+
+        // Στέλνουμε **ένα email** με όλους τους πελάτες
+        Mail::to('vassilis@teamapp.gr')->send(new HostingExpirySummary($expiringClients));
+
+        $this->info('Το email με τις επερχόμενες λήξεις στάλθηκε επιτυχώς.');
     }
 }
