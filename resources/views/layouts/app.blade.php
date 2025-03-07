@@ -81,5 +81,67 @@
         });
     </script>
 
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".renew-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let clientId = this.getAttribute("data-client-id");
+
+                Swal.fire({
+                    title: 'Επιλέξτε Διάρκεια Ανανέωσης',
+                    input: 'select',
+                    inputOptions: {
+                        '3': '3 μήνες',
+                        '6': '6 μήνες',
+                        '12': '12 μήνες',
+                        'custom': 'Άλλο (Καθορισμός μηνών)'
+                    },
+                    inputPlaceholder: 'Επιλέξτε μήνες',
+                    showCancelButton: true,
+                    confirmButtonText: 'Επιβεβαίωση',
+                    cancelButtonText: 'Ακύρωση',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Πρέπει να επιλέξετε μια επιλογή!';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (result.value === 'custom') {
+                            Swal.fire({
+                                title: 'Εισάγετε τον αριθμό των μηνών',
+                                input: 'number',
+                                inputPlaceholder: 'Πόσους μήνες;',
+                                inputAttributes: {
+                                    min: 1,
+                                    step: 1
+                                },
+                                showCancelButton: true,
+                                confirmButtonText: 'Ανανέωση',
+                                cancelButtonText: 'Ακύρωση',
+                                inputValidator: (value) => {
+                                    if (!value || value <= 0) {
+                                        return 'Πρέπει να εισάγετε έναν έγκυρο αριθμό!';
+                                    }
+                                }
+                            }).then((customResult) => {
+                                if (customResult.isConfirmed) {
+                                    document.getElementById(`renewalMonths-${clientId}`).value = customResult.value;
+                                    document.getElementById(`renewalForm-${clientId}`).submit();
+                                }
+                            });
+                        } else {
+                            document.getElementById(`renewalMonths-${clientId}`).value = result.value;
+                            document.getElementById(`renewalForm-${clientId}`).submit();
+                        }
+                    }
+                });
+            });
+        });
+    });
+    </script>
+
+
+
 </body>
 </html>

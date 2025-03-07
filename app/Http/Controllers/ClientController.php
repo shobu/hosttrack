@@ -114,20 +114,26 @@ class ClientController extends Controller
     }
 
  
-    public function renew(Client $client)
+    public function renew(Request $request, Client $client)
     {
-        if (!$client->can_renew) {
+        // Μετατροπή της εισόδου σε integer (default: 12 μήνες)
+        $monthsToAdd = (int) $request->input('months', 12);
+    
+        // Έλεγχος αν η φιλοξενία μπορεί να ανανεωθεί (δηλαδή αν είναι 1 μήνα ή λιγότερο πριν τη λήξη)
+        if (Carbon::parse($client->hosting_expiration_date)->gt(Carbon::now()->addMonth())) {
             return redirect()->route('clients.index')->with('error', 'Η φιλοξενία μπορεί να ανανεωθεί μόνο όταν απομένει 1 μήνας ή λιγότερο.');
         }
     
-        // Αποθήκευση προηγούμενης ημερομηνίας
-        $oldExpirationDate = clone $client->hosting_expiration_date;
-        $newExpirationDate = \Carbon\Carbon::parse($client->hosting_expiration_date)->addYear();
+        // Αποθήκευση της παλιάς ημερομηνίας
+        $oldExpirationDate = Carbon::parse($client->hosting_expiration_date);
+        $newExpirationDate = $oldExpirationDate->copy()->addMonths($monthsToAdd);
     
-        // Ενημέρωση πελάτη
-        $client->update(['hosting_expiration_date' => $newExpirationDate]);
+        // Ενημέρωση της ημερομηνίας λήξης του πελάτη
+        $client->update([
+            'hosting_expiration_date' => $newExpirationDate,
+        ]);
     
-        // Καταγραφή στο ιστορικό
+        // Καταγραφή στο ιστορικό ανανεώσεων
         RenewalLog::create([
             'client_id' => $client->id,
             'old_expiration_date' => $oldExpirationDate,
@@ -135,8 +141,9 @@ class ClientController extends Controller
             'renewed_at' => now(),
         ]);
     
-        return redirect()->route('clients.index')->with('success', 'Η φιλοξενία ανανεώθηκε επιτυχώς.');
+        return redirect()->route('clients.index')->with('success', "Η φιλοξενία ανανεώθηκε για $monthsToAdd μήνες.");
     }
+    
 
 
     public function updateInvoice(Request $request, RenewalLog $renewalLog)

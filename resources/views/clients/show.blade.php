@@ -24,14 +24,20 @@
                 </a>
 
                 <!-- Κουμπί Ανανέωσης -->
-                <form id="renew-form-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST">
+                @php
+                    $canRenew = \Carbon\Carbon::parse($client->hosting_expiration_date)->lte(\Carbon\Carbon::now()->addDays(30));
+                @endphp
+
+                <button class="btn btn-success renew-btn" data-client-id="{{ $client->id }}" {{ $canRenew ? '' : 'disabled' }}>
+                    Ανανέωση Hosting
+                </button>
+
+                <!-- Form για ανανέωση (θα υποβάλλεται από JavaScript) -->
+                <form id="renewalForm-{{ $client->id }}" action="{{ route('clients.renew', $client) }}" method="POST" style="display:none;">
                     @csrf
-                    <button type="button" class="btn btn-success" 
-                            onclick="confirmAction('renew-form-{{ $client->id }}', 'Θέλεις να προσθέσεις 1 έτος στη φιλοξενία;')" 
-                            {{ $canRenew ? '' : 'disabled' }}>
-                        Ανανέωση +1 Έτος
-                    </button>
+                    <input type="hidden" name="months" id="renewalMonths-{{ $client->id }}" value="12"> 
                 </form>
+
 
                 <!-- Κουμπί Διαγραφής -->
                 <form id="delete-form-{{ $client->id }}" action="{{ route('clients.destroy', $client) }}" method="POST">
