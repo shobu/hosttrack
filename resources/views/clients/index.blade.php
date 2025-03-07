@@ -26,7 +26,15 @@
             </thead>
             <tbody>
                 @forelse($clients as $client)
-                <tr class="{{ $client->can_renew ? 'border-left-warning' : '' }} {{ $client->hosting_expiration_date < now() ? 'border-left-danger' : '' }}">
+                @php
+                    $borderClass = '';
+                    if ($client->hosting_expiration_date < now()) {
+                        $borderClass = 'border-left-danger'; // Αν έχει λήξει, να είναι κόκκινο
+                    } elseif ($client->can_renew) {
+                        $borderClass = 'border-left-warning'; // Αν είναι 1 μήνα πριν τη λήξη, να είναι κίτρινο
+                    }
+                @endphp
+                <tr class="{{ $borderClass }}">
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $client->first_name }} {{ $client->last_name }}</td>
                     <td>{{ $client->domain_name }}</td>
