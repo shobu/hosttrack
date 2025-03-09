@@ -40,7 +40,39 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <!-- Συνολικό Εισόδημα από Φιλοξενία -->
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Έσοδα από Φιλοξενία</h5>
+                        <p class="card-text">€{{ number_format($totalHostingIncome, 2) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Συνολικό Εισόδημα από Υποστήριξη -->
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Έσοδα από Υποστήριξη</h5>
+                        <p class="card-text">€{{ number_format($totalSupportIncome, 2) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Συνολικά Έσοδα -->
+            <div class="col-md-4">
+                <div class="card text-white bg-dark mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Συνολικά Έσοδα</h5>
+                        <p class="card-text">€{{ number_format($totalIncome, 2) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    
 <div>
     <h3>Ανανεώσεις Ανά Μήνα</h3>
     <canvas id="renewalsChart"></canvas>

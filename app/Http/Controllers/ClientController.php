@@ -123,9 +123,11 @@ class ClientController extends Controller
             : (int) $request->input('months', 12);
     
         $amount = (float) $request->input('amount', $client->hosting_cost); 
-    
-        // **Ορισμός της μεταβλητής πριν τη χρήση της**
         $invoiceNumber = $request->has('invoice_number') ? $request->input('invoice_number') : null;
+    
+        // Έλεγχος αν επιλέχθηκε υποστήριξη
+        $supportService = $request->has('support_service') ? true : false;
+        $supportCost = $supportService ? (float) $request->input('support_cost', 120) : null;
     
         if (Carbon::parse($client->hosting_expiration_date)->gt(Carbon::now()->addMonth())) {
             return redirect()->route('clients.index')->with('error', 'Η φιλοξενία μπορεί να ανανεωθεί μόνο όταν απομένει 1 μήνας ή λιγότερο.');
@@ -138,17 +140,17 @@ class ClientController extends Controller
         $client->update([
             'hosting_expiration_date' => $newExpirationDate,
         ]);
-
+    
         // **Καταγραφή Πληρωμής στο PaymentLog**
         $paymentLog = new PaymentLog();
         $paymentLog->client_id = $client->id;
         $paymentLog->amount = $amount;
         $paymentLog->payment_date = now();
         $paymentLog->invoice_number = $invoiceNumber;
+        $paymentLog->support_service = $supportService;
+        $paymentLog->support_cost = $supportCost;
         $paymentLog->save(); // **Τώρα το αντικείμενο έχει `id`**
-
-
-               
+    
         // **Καταγραφή στο Ιστορικό Ανανέωσης (RenewalLog)**
         RenewalLog::create([
             'client_id' => $client->id,
@@ -158,9 +160,9 @@ class ClientController extends Controller
             'payment_id' => $paymentLog->id, // **Σύνδεση με την πληρωμή**
         ]);
     
-
         return redirect()->route('clients.index')->with('success', "Η φιλοξενία ανανεώθηκε για $monthsToAdd μήνες και καταγράφηκε πληρωμή.");
     }
+    
     
     
     public function deletePayment(PaymentLog $payment)

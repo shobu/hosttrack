@@ -91,6 +91,18 @@
                                 <label for="invoiceNumber" class="mt-3">Αριθμός Τιμολογίου (προαιρετικό):</label>
                                 <input type="text" name="invoice_number" id="invoiceNumber-{{ $client->id }}" class="form-control">
 
+                                <!-- Νέο Checkbox για Υποστήριξη -->
+                                <div class="form-check mt-3">
+                                    <input type="checkbox" class="form-check-input" id="supportService-{{ $client->id }}" name="support_service" onchange="toggleSupportCost({{ $client->id }})">
+                                    <label class="form-check-label" for="supportService-{{ $client->id }}">Προσθήκη Υποστήριξης (Security Updates & Backup) +120€/έτος</label>
+                                </div>
+
+                                <!-- Πεδίο κόστους υποστήριξης (εμφανίζεται μόνο αν είναι τσεκαρισμένο το checkbox) -->
+                                <div id="supportCostContainer-{{ $client->id }}" style="display: none; margin-top: 10px;">
+                                    <label for="supportCost">Προσαρμοσμένο Κόστος Υποστήριξης:</label>
+                                    <input type="number" step="0.01" name="support_cost" id="supportCost-{{ $client->id }}" class="form-control" value="120">
+                                </div>
+
                                 <button type="submit" class="btn btn-success mt-3">Ανανέωση</button>
                             </form>
                         </div>
@@ -98,49 +110,57 @@
                 </div>
             </div>
 
+
             
         </div>
     </div>
-
-    <h3>Ιστορικό Ανανέωσης</h3>
-    <h5>Σύνολο πληρωμών: {{ number_format($client->payments->sum('amount'), 2) }} €</h5>
-
-    @if ($client->renewalLogs->count() > 0)
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Προηγούμενη Λήξη</th>
-                    <th>Νέα Λήξη</th>
-                    <th>Ημερομηνία Ανανέωσης</th>
-                    <th>Ποσό (€)</th>
-                    <th>Τιμολόγιο</th>
-                    <th>Ενέργειες</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($client->renewalLogs as $log)
-                    <tr>
-                        <td>{{ \Carbon\Carbon::parse($log->old_expiration_date)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($log->new_expiration_date)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($log->renewed_at)->format('d/m/Y H:i') }}</td>
-                        <td>{{ $log->payment ? number_format($log->payment->amount, 2) : '-' }} €</td>
-                        <td>{{ $log->payment ? $log->payment->invoice_number : '-' }}</td>
-                        <td>
-                            <!-- Φόρμα Διαγραφής Ανανεώσεων -->
-                            <form action="{{ route('renewals.delete', ['renewal' => $log->id]) }}" method="POST" onsubmit="return confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτή την ανανέωση και την αντίστοιχη πληρωμή;');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Διαγραφή</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @else
-        <p>Δεν υπάρχουν ανανεώσεις για αυτόν τον πελάτη.</p>
-    @endif
-
+    <div style="margin-top: 20px;">
+        <h3>Ιστορικό Ανανέωσης</h3>
+        <h5>Σύνολο πληρωμών: {{ number_format($client->payments->sum('amount') + $client->payments->sum('support_cost'), 2) }} €</h5>
+        <div class="card">
+            <div class="card-body">
+                @if ($client->renewalLogs->count() > 0)
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Προηγούμενη Λήξη</th>
+                                <th>Νέα Λήξη</th>
+                                <th>Ημερομηνία Ανανέωσης</th>
+                                <th>Ποσό Φιλοξενίας (€)</th>
+                                <th>Ποσό Υποστήριξης (€)</th>
+                                <th>Τιμολόγιο</th>
+                                <th>Ενέργειες</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($client->renewalLogs as $log)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($log->old_expiration_date)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log->new_expiration_date)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log->renewed_at)->format('d/m/Y H:i') }}</td>
+                                    <td>{{ $log->payment ? number_format($log->payment->amount, 2) : '-' }} €</td>
+                                    <td>
+                                        {{ $log->payment && $log->payment->support_service ? number_format($log->payment->support_cost, 2) : '-' }} €
+                                    </td>
+                                    <td>{{ $log->payment ? $log->payment->invoice_number : '-' }}</td>
+                                    <td>
+                                        <!-- Φόρμα Διαγραφής Ανανεώσεων -->
+                                        <form action="{{ route('renewals.delete', ['renewal' => $log->id]) }}" method="POST" onsubmit="return confirm('Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτή την ανανέωση και την αντίστοιχη πληρωμή;');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">Διαγραφή</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <p>Δεν υπάρχουν ανανεώσεις για αυτόν τον πελάτη.</p>
+                @endif
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>

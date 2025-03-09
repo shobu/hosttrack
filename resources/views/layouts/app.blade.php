@@ -81,22 +81,45 @@
         });
     </script>
 
-<script>
-    function toggleCustomMonths(clientId) {
-        let select = document.getElementById("renewalMonths-" + clientId);
-        let customContainer = document.getElementById("customMonthsContainer-" + clientId);
-        let customInput = document.getElementById("customMonths-" + clientId);
+    <script>
+        function toggleCustomMonths(clientId) {
+            let select = document.getElementById("renewalMonths-" + clientId);
+            let customContainer = document.getElementById("customMonthsContainer-" + clientId);
+            let customInput = document.getElementById("customMonths-" + clientId);
 
-        if (select.value === "custom") {
-            customContainer.style.display = "block";
-            customInput.setAttribute("required", "true");
+            if (select.value === "custom") {
+                customContainer.style.display = "block";
+                customInput.setAttribute("required", "true");
+            } else {
+                customContainer.style.display = "none";
+                customInput.removeAttribute("required");
+                customInput.value = ""; // Καθαρίζουμε την τιμή
+            }
+        }
+    </script>
+    <script>
+    function toggleCustomMonths(clientId) {
+        var monthsSelect = document.getElementById("renewalMonths-" + clientId);
+        var customMonthsContainer = document.getElementById("customMonthsContainer-" + clientId);
+
+        if (monthsSelect.value === "custom") {
+            customMonthsContainer.style.display = "block";
         } else {
-            customContainer.style.display = "none";
-            customInput.removeAttribute("required");
-            customInput.value = ""; // Καθαρίζουμε την τιμή
+            customMonthsContainer.style.display = "none";
         }
     }
-</script>
+
+    function toggleSupportCost(clientId) {
+        var supportCheckbox = document.getElementById("supportService-" + clientId);
+        var supportCostContainer = document.getElementById("supportCostContainer-" + clientId);
+
+        if (supportCheckbox.checked) {
+            supportCostContainer.style.display = "block";
+        } else {
+            supportCostContainer.style.display = "none";
+        }
+    }
+    </script>
 
 
 

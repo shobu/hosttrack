@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\RenewalLog;
+use App\Models\PaymentLog;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -34,8 +35,21 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
+        // Συνολικός αριθμός πελατών που έχουν λήξει
         $expired = Client::where('hosting_expiration_date', '<', now())->count();
 
-        return view('dashboard.index', compact('totalClients', 'expiringClients', 'recentRenewals', 'renewalsPerMonth', 'expired'));
+        // ✅ Συνολικά έσοδα από φιλοξενία (Hosting)
+        $totalHostingIncome = PaymentLog::sum('amount');
+
+        // ✅ Συνολικά έσοδα από υποστήριξη (Support)
+        $totalSupportIncome = PaymentLog::where('support_service', true)->sum('support_cost');
+
+        // ✅ Συνολικά έσοδα από όλα (Hosting + Υποστήριξη)
+        $totalIncome = $totalHostingIncome + $totalSupportIncome;
+
+        return view('dashboard.index', compact(
+            'totalClients', 'expiringClients', 'recentRenewals', 'renewalsPerMonth', 
+            'expired', 'totalHostingIncome', 'totalSupportIncome', 'totalIncome'
+        ));
     }
 }

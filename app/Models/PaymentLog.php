@@ -13,6 +13,8 @@ class PaymentLog extends Model {
         'amount',
         'payment_date',
         'invoice_number',
+        'support_service',
+        'support_cost', 
     ];
 
     public function client() {
