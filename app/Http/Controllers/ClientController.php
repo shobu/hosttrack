@@ -30,7 +30,7 @@ class ClientController extends Controller
         // Φορτώνουμε τα renewal logs μαζί με τα clients για καλύτερη απόδοση
         $clients = $query->with('renewalLogs')
                         ->orderBy('hosting_expiration_date', 'asc')
-                        ->paginate(1);
+                        ->paginate(10);
 
         return view('clients.index', compact('clients'));
     }
