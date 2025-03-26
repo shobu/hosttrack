@@ -14,6 +14,7 @@ class Client extends Model
         'last_name',
         'afm',
         'email',
+        'company',
         'hosting_cost',
         'hosting_start_date',
         'hosting_expiration_date',

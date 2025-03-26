@@ -19,7 +19,6 @@
         @method('PUT')
 
         <div class="row">
-            <!-- Όνομα & Επώνυμο -->
             <div class="col-md-6 mb-3">
                 <label for="first_name" class="form-label">Όνομα</label>
                 <input type="text" name="first_name" id="first_name" class="form-control" 
@@ -31,7 +30,6 @@
                        value="{{ old('last_name', isset($client) ? $client->last_name : '') }}" required>
             </div>
 
-            <!-- Domain & ΑΦΜ -->
             <div class="col-md-6 mb-3">
                 <label for="domain_name" class="form-label">Domain Name</label>
                 <input type="text" name="domain_name" id="domain_name" class="form-control" 
@@ -43,20 +41,23 @@
                        value="{{ old('afm', isset($client) ? $client->afm : '') }}" required>
             </div>
 
-            <!-- Email & Κόστος Φιλοξενίας -->
             <div class="col-md-6 mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" name="email" id="email" class="form-control" 
                        value="{{ old('email', isset($client) ? $client->email : '') }}" required>
             </div>
             <div class="col-md-6 mb-3">
+                <label for="company" class="form-label">Εταιρεία (αν φιλοξενείται για άλλον)</label>
+                <input type="text" name="company" id="company" class="form-control" value="{{ old('company', $client->company ?? '') }}">
+            </div>
+
+            <div class="col-md-4 mb-3">
                 <label for="hosting_cost" class="form-label">Κόστος Φιλοξενίας</label>
                 <input type="number" name="hosting_cost" id="hosting_cost" class="form-control" 
                        value="{{ old('hosting_cost', isset($client) ? $client->hosting_cost : '') }}" required>
             </div>
 
-            <!-- Ημερομηνία Έναρξης -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="hosting_start_date" class="form-label">Ημερομηνία Έναρξης</label>
                 <input type="date" name="hosting_start_date" id="hosting_start_date"
                     class="form-control"
@@ -64,8 +65,7 @@
                     required>
             </div>
 
-            <!-- Ημερομηνία Λήξης -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="hosting_expiration_date" class="form-label">Ημερομηνία Λήξης</label>
                 <input type="date" name="hosting_expiration_date" id="hosting_expiration_date"
                     class="form-control"

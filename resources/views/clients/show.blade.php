@@ -9,7 +9,8 @@
             <h4>{{ $client->first_name }} {{ $client->last_name }}</h4>
             <p><strong>Domain:</strong> {{ $client->domain_name }}</p>
             <p><strong>ΑΦΜ:</strong> {{ $client->afm }}</p>
-            <p><strong>Email:</strong> {{ $client->email }}</p>
+            <p><strong>Email:</strong> {{ $client->email }}</p> 
+            <p><strong>Εταιρεία:</strong> {{ $client->company ?? '-' }}</p>
             <p><strong>Κόστος Φιλοξενίας:</strong> €{{ $client->hosting_cost }}</p>
             <p><strong>Ημερομηνία Έναρξης:</strong> {{ \Carbon\Carbon::parse($client->hosting_start_date)->format('d/m/Y') }}</p>
             <p><strong>Ημερομηνία Λήξης:</strong> {{ \Carbon\Carbon::parse($client->hosting_expiration_date)->format('d/m/Y') }}</p>
