@@ -58,7 +58,9 @@
 
     <!-- Pagination -->
     <div class="d-flex justify-content-center mt-3">
-        {{ $clients->links() }}
+        <div class="w-100 text-center">
+            {{ $clients->links() }}
+        </div>
     </div>
 </div>
 @endsection
