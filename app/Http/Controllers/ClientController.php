@@ -55,6 +55,7 @@ class ClientController extends Controller
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
             'hosting_expiration_date' => 'required|date|after:hosting_start_date',
+            'notes' => 'nullable|string',
         ]);
     
         // Μετατροπή ημερομηνιών από `d/m/Y` σε `Y-m-d` πριν αποθηκευτούν στη βάση
@@ -82,14 +83,13 @@ class ClientController extends Controller
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
             'hosting_expiration_date' => 'required|date|after:hosting_start_date',
+            'notes' => 'nullable|string',
         ]);
     
-        // Μετατροπή ημερομηνιών από `d/m/Y` σε `Y-m-d` πριν αποθηκευτούν στη βάση
-        $validatedData['hosting_start_date'] = \Carbon\Carbon::createFromFormat('Y-m-d', $request->hosting_start_date)->format('Y-m-d');
-        $validatedData['hosting_expiration_date'] = \Carbon\Carbon::createFromFormat('Y-m-d', $request->hosting_expiration_date)->format('Y-m-d');      
-    
-        // Αν γίνει αλλαγή στην ημερομηνία λήξης, καταγραφή στο ιστορικό
-        if ($client->hosting_expiration_date !== $validatedData['hosting_expiration_date']) {
+        $oldDate = \Carbon\Carbon::parse($client->hosting_expiration_date)->format('Y-m-d');
+        $newDate = \Carbon\Carbon::parse($validatedData['hosting_expiration_date'])->format('Y-m-d');
+        
+        if ($oldDate !== $newDate) {
             RenewalLog::create([
                 'client_id' => $client->id,
                 'old_expiration_date' => $client->hosting_expiration_date,
@@ -101,7 +101,7 @@ class ClientController extends Controller
         // Ενημέρωση πελάτη
         $client->update($validatedData);
     
-        return redirect()->route('clients.index')->with('success', 'Τα στοιχεία του πελάτη ενημερώθηκαν επιτυχώς.');
+        return redirect()->route('clients.show', $client)->with('success', 'Τα στοιχεία του πελάτη ενημερώθηκαν επιτυχώς.');
     }
     
 
