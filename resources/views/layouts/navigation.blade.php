@@ -19,6 +19,9 @@
                     <li class="nav-item">
                         <a href="{{ route('clients.inactive') }}" class="nav-link">Ανενεργοί Πελάτες</a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('servers.index') }}" class="nav-link">Servers</a>
+                    </li>
 
                 @endauth
             </ul>

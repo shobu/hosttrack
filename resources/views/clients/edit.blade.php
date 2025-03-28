@@ -72,8 +72,17 @@
                     value="{{ old('hosting_expiration_date', isset($client) ? \Carbon\Carbon::parse($client->hosting_expiration_date)->format('Y-m-d') : '') }}"
                     required>
             </div>
-
-
+            <div class="col-md-12 mb-3">
+                <label for="server_id" class="form-label">Server Φιλοξενίας</label>
+                <select name="server_id" id="server_id" class="form-control">
+                    <option value="">-- Καμία Αντιστοίχιση --</option>
+                    @foreach($servers as $server)
+                        <option value="{{ $server->id }}" {{ old('server_id', $client->server_id) == $server->id ? 'selected' : '' }}>
+                            {{ $server->name }} ({{ $server->ip_address }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <!-- Σημειώσεις -->
             <div class="col-md-12 mb-3">
                 <label for="notes" class="form-label">Σημειώσεις</label>

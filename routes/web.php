@@ -37,4 +37,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/payments/{payment}', [ClientController::class, 'deletePayment'])->name('payments.delete');
     Route::delete('/renewals/{renewal}', [RenewalLogController::class, 'destroy'])->name('renewals.delete');
 
+    Route::resource('servers', App\Http\Controllers\ServerController::class);
+
 });

@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,6 +17,7 @@ class Client extends Model
         'email',
         'company',
         'hosting_cost',
+        'server_id',
         'hosting_start_date',
         'hosting_expiration_date',
         'notes',
@@ -44,6 +46,11 @@ class Client extends Model
     public function paymentLogs()
     {
         return $this->hasMany(PaymentLog::class, 'client_id');
+    }
+
+    public function server()
+    {
+        return $this->belongsTo(\App\Models\Server::class);
     }
     
 }

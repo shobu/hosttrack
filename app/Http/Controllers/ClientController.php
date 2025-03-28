@@ -83,6 +83,7 @@ class ClientController extends Controller
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
             'hosting_expiration_date' => 'required|date|after:hosting_start_date',
+            'server_id' => 'nullable|exists:servers,id',
             'notes' => 'nullable|string',
         ]);
     
@@ -97,7 +98,6 @@ class ClientController extends Controller
                 'renewed_at' => now(),
             ]);
         }
-    
         // Ενημέρωση πελάτη
         $client->update($validatedData);
     
@@ -107,7 +107,8 @@ class ClientController extends Controller
 
     public function edit(Client $client)
     {
-        return view('clients.edit', compact('client'));
+        $servers = \App\Models\Server::all();
+        return view('clients.edit', compact('client', 'servers'));
     }
 
     public function destroy(Client $client)
@@ -195,7 +196,7 @@ class ClientController extends Controller
 
     public function show(Client $client)
         {
-            $client->load(['renewalLogs', 'paymentLogs']); // Φόρτωση και των πληρωμών
+            $client->load(['renewalLogs', 'paymentLogs', 'server']); 
             $canRenew = \Carbon\Carbon::parse($client->hosting_expiration_date)->lte(now()->addMonth());
             return view('clients.show', compact('client', 'canRenew'));
         }

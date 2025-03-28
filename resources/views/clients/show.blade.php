@@ -12,6 +12,13 @@
             <p><strong>Email:</strong> {{ $client->email }}</p> 
             <p><strong>Εταιρεία:</strong> {{ $client->company ?? '-' }}</p>
             <p><strong>Κόστος Φιλοξενίας:</strong> €{{ $client->hosting_cost }}</p>
+            <p><strong>Server Φιλοξενίας:</strong>
+                @if ($client->server)
+                    {{ $client->server->name }} ({{ $client->server->ip_address }}) - {{ $client->hosting_company }}
+                @else
+                    <em>Δεν έχει οριστεί server</em>
+                @endif
+            </p>
             <p><strong>Ημερομηνία Έναρξης:</strong> {{ \Carbon\Carbon::parse($client->hosting_start_date)->format('d/m/Y') }}</p>
             <p><strong>Ημερομηνία Λήξης:</strong> {{ \Carbon\Carbon::parse($client->hosting_expiration_date)->format('d/m/Y') }}</p>
             <p><strong>Σημειώσεις:</strong> {{ $client->notes ?? '-' }}</p>
