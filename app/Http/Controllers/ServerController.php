@@ -91,6 +91,9 @@ class ServerController extends Controller
      */
     public function destroy(Server $server)
     {
+        if ($server->clients()->exists()) {
+            return redirect()->route('servers.index')->with('error', 'Ο server δεν μπορεί να διαγραφεί γιατί έχει συνδεδεμένους πελάτες.');
+        }
         $server->delete();
         return redirect()->route('servers.index')->with('success', 'Ο server διαγράφηκε με επιτυχία.');
     }
