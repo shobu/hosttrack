@@ -20,6 +20,7 @@
                     <th>#</th>
                     <th>Όνομα</th>
                     <th>Domain</th>
+                    <th>Server</th>
                     <th>Λήξη Hosting</th>
                     <th>Ενέργειες</th>
                 </tr>
@@ -38,6 +39,13 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $client->first_name }} {{ $client->last_name }}</td>
                     <td>{{ $client->domain_name }}</td>
+                    <td>
+                        @if ($client->server)
+                            {{ $client->server->name }}
+                        @else
+                            <em>-</em>
+                        @endif
+                    </td>
                     <td>{{ \Carbon\Carbon::parse($client->hosting_expiration_date)->format('d/m/Y') }}</td>
                     <td>
                         <div class="d-flex gap-2">
