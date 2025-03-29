@@ -3,9 +3,14 @@
 @section('content')
 <div class="container">
     <h2 class="mb-4">Λίστα Servers</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ route('servers.create') }}" class="btn btn-primary">Προσθήκη Server</a>
 
-    <a href="{{ route('servers.create') }}" class="btn btn-primary mb-3">+ Προσθήκη Server</a>
-
+        <div>
+            <strong>Σύνολο κόστους / μήνα:</strong>
+            {{ number_format($totalMonthlyCost, 2) }} €
+        </div>
+    </div>
     @if($servers->count())
         <table class="table table-bordered">
             <thead class="table-dark">

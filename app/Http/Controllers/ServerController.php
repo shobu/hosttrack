@@ -14,7 +14,8 @@ class ServerController extends Controller
     public function index()
     {
         $servers = \App\Models\Server::withCount('clients')->get();
-        return view('servers.index', compact('servers'));
+        $totalMonthlyCost = $servers->sum('monthly_cost');
+        return view('servers.index', compact('servers', 'totalMonthlyCost'));
     }
 
     /**
