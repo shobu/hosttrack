@@ -78,7 +78,7 @@
     <canvas id="renewalsChart"></canvas>
 </div>
 <div>
-<h5>Συνολικές πληρωμές: {{ number_format(\App\Models\PaymentLog::sum('amount'), 2) }} €</h5>
+<p>Συνολικά Έξοδα Servers: {{ number_format($totalServerExpenses, 2) }} €</p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

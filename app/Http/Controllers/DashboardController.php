@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\RenewalLog;
 use App\Models\PaymentLog;
 use Carbon\Carbon;
+use App\Models\MonthlyServerCost;
 
 class DashboardController extends Controller
 {
@@ -47,9 +48,11 @@ class DashboardController extends Controller
         // ✅ Συνολικά έσοδα από όλα (Hosting + Υποστήριξη)
         $totalIncome = $totalHostingIncome + $totalSupportIncome;
 
+        $totalServerExpenses = MonthlyServerCost::sum('total_cost');
+
         return view('dashboard.index', compact(
             'totalClients', 'expiringClients', 'recentRenewals', 'renewalsPerMonth', 
-            'expired', 'totalHostingIncome', 'totalSupportIncome', 'totalIncome'
+            'expired', 'totalHostingIncome', 'totalSupportIncome', 'totalIncome', 'totalServerExpenses'
         ));
     }
 }
