@@ -38,7 +38,8 @@ class ClientController extends Controller
 
     public function create()
     {
-        return view('clients.create');
+        $servers = \App\Models\Server::all();
+        return view('clients.create', compact('servers'));
     }
 
     public function store(Request $request)

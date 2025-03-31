@@ -50,7 +50,7 @@
             </div>
             <div class="col-md-4 mb-3">
                 <label for="hosting_cost" class="form-label">Κόστος Φιλοξενίας</label>
-                <input type="number" name="hosting_cost" id="hosting_cost" class="form-control" 
+                <input type="number" name="hosting_cost" id="hosting_cost" class="form-control" step="0.01"
                        value="{{ old('hosting_cost', isset($client) ? $client->hosting_cost : '') }}" required>
             </div>
             <div class="col-md-4 mb-3">
@@ -68,7 +68,17 @@
                     value="{{ old('hosting_expiration_date', isset($client) ? \Carbon\Carbon::parse($client->hosting_expiration_date)->format('Y-m-d') : '') }}"
                     required>
             </div>
-
+            <div class="col-md-12 mb-3">
+                <label for="server_id" class="form-label">Server Φιλοξενίας</label>
+                <select name="server_id" id="server_id" class="form-control">
+                    <option value="">-- Καμία Αντιστοίχιση --</option>
+                    @foreach($servers as $server)
+                        <option value="{{ $server->id }}" {{ old('server_id') == $server->id ? 'selected' : '' }}>
+                            {{ $server->name }} ({{ $server->ip_address }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-md-12 mb-3">
                 <label for="notes" class="form-label">Σημειώσεις</label>
                 <textarea name="notes" id="notes" class="form-control" rows="3">{{ old('notes', isset($client) ? $client->notes : '') }}</textarea>

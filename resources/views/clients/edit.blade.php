@@ -53,7 +53,7 @@
 
             <div class="col-md-4 mb-3">
                 <label for="hosting_cost" class="form-label">Κόστος Φιλοξενίας</label>
-                <input type="number" name="hosting_cost" id="hosting_cost" class="form-control" 
+                <input type="number" name="hosting_cost" id="hosting_cost" class="form-control" step="0.01"
                        value="{{ old('hosting_cost', isset($client) ? $client->hosting_cost : '') }}" required>
             </div>
 
