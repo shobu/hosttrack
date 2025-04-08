@@ -56,6 +56,7 @@ class ClientController extends Controller
             'hosting_cost' => 'required|numeric',
             'hosting_start_date' => 'required|date',
             'hosting_expiration_date' => 'required|date|after:hosting_start_date',
+            'server_id' => 'nullable|exists:servers,id',
             'notes' => 'nullable|string',
         ]);
     
