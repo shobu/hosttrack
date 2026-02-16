@@ -24,8 +24,8 @@ class SendHostingExpiryNotifications extends Command
     {
         // Εύρεση πελατών που λήγουν σε 30 ημέρες και ταξινόμηση
         $expiryDate = Carbon::now()->addDays(30);
-        $expiringClients = Client::where('status', 'active')   // Μόνο ενεργοί πελάτες
-                                 ->whereNotNull('hosting_expiration_date') // Αποφυγή κενών ημερομηνιών
+        $expiringClients = Client::where('status', 'active') 
+                                 ->whereNotNull('hosting_expiration_date')
                                  ->where('hosting_expiration_date', '<=', $expiryDate)
                                  ->orderBy('hosting_expiration_date', 'asc')
                                  ->get();
